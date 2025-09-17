@@ -1,13 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet/dist/leaflet.css"
-  />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Meerdere markers</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
   <style>
     #map {
       height: 400px;
@@ -16,43 +13,53 @@
   </style>
 </head>
 <body>
-    <h2>Roermond Locatie</h2>
-     <div id="map"></div>
+  <h2>Locaties in Roermond</h2>
+  <div id="map"></div>
 
-   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script>
-    // Query Nominatim for Roermond
-    fetch("https://nominatim.openstreetmap.org/search?format=json&q=marathonlaan 4 roermond", {
-      headers: { "Accept": "application/json" }
-    })
-      .then((res) => res.json())
-      .then((data) => {
+    // Functie om locatie op te halen en marker te plaatsen
+    async function addMarker(address, map) {
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`, {
+          headers: { "Accept": "application/json" }
+        });
+        const data = await res.json();
+
         if (!data || data.length === 0) {
-          alert("Location not found");
+          console.warn("Geen locatie gevonden voor:", address);
           return;
         }
 
-        // Use the first result
         const { lat, lon, display_name } = data[0];
 
-        // Initialize map centered on Roermond
-        const map = L.map("map").setView([lat, lon], 13);
-
-        // Add OpenStreetMap tiles
-        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-          attribution:
-            '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> contributors'
-        }).addTo(map);
-
-        // Add marker
         L.marker([lat, lon])
           .addTo(map)
-          .bindPopup(display_name)
-          .openPopup();
-      })
-      .catch((err) => {
+          .bindPopup(display_name);
+      } catch (err) {
         console.error("Error fetching location:", err);
-      });
+      }
+    }
+
+    // Initialiseer de kaart
+    const map = L.map("map").setView([51.1942, 5.987], 13);
+
+    // Voeg OpenStreetMap tiles toe
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> contributors'
+    }).addTo(map);
+
+    // Adressen array
+    const addresses = [
+      "Marathonlaan 4, Roermond",
+      "Stationsplein, Roermond",
+      "Munsterplein, Roermond"
+    ];
+
+    // Loop door adressen en markers toevoegen
+    for (let i = 0; i < addresses.length; i++) {
+      addMarker(addresses[i], map);
+    }
   </script>
 </body>
 </html>
