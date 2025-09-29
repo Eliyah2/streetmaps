@@ -18,7 +18,7 @@
 
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script>
-    // Functie om locatie op te halen en marker te plaatsen
+    // Functie om één adres op te halen en een marker te plaatsen (async/await)
     async function addMarker(address, map) {
       try {
         const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`, {
@@ -32,12 +32,17 @@
         }
 
         const { lat, lon, display_name } = data[0];
+        L.marker([lat, lon]).addTo(map).bindPopup(display_name);
 
-        L.marker([lat, lon])
-          .addTo(map)
-          .bindPopup(display_name);
       } catch (err) {
         console.error("Error fetching location:", err);
+      }
+    }
+
+    // NIEUWE functie om meerdere markers achter elkaar toe te voegen
+    async function addMarkers(addresses, map) {
+      for (const address of addresses) {
+        await addMarker(address, map);
       }
     }
 
@@ -56,10 +61,8 @@
       "Munsterplein, Roermond"
     ];
 
-    // Loop door adressen en markers toevoegen
-    for (let i = 0; i < addresses.length; i++) {
-      addMarker(addresses[i], map);
-    }
+    // Gebruik nu de nieuwe functie
+    addMarkers(addresses, map);
   </script>
 </body>
 </html>
